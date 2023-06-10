@@ -300,14 +300,8 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
 
     title_con = st.container()
     component_con = st.container()
-    file_uploader_con = st.container()
 
-    with file_uploader_con:
-        chosen_file = st.file_uploader('Choose data file.csv', accept_multiple_files=False)
-
-    data = None
-    if chosen_file:
-        data = pd.read_csv(chosen_file)
+    data = pd.read_csv(os.path.join(os.path.dirname(parent_dir), 'public/experiment.csv'))
 
     with title_con:
         if data is not None:
@@ -323,7 +317,6 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
     with component_con:
         if data is not None:
             key_string_regex = re.compile('[^a-zA-Z0-9]')
-            key_string = key_string_regex.sub('', f'barchart_{chosen_file.name}')
 
             metadata = {}
             metadata['metric'] = seleted_metric

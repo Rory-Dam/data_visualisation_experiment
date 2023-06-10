@@ -188,7 +188,6 @@ viewership_component_fun = components.declare_component('viewership_component', 
 
 title_con = st.container()
 component_con = st.container()
-file_uploader_con = st.container()
 
 data = pd.read_csv(os.path.join(os.path.dirname(parent_dir), 'public/experiment.csv'))
 
