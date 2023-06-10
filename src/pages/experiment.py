@@ -223,6 +223,7 @@ elif st.session_state['experiment_state'] == STATE_BAR_FIRST or \
     with component_con:
         if data is not None:
             key_string_regex = re.compile('[^a-zA-Z0-9]')
+            key_string = key_string_regex.sub('', f'barchart')
 
             metadata = {}
             metadata['metric'] = seleted_metric
@@ -310,6 +311,7 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
     with component_con:
         if data is not None:
             key_string_regex = re.compile('[^a-zA-Z0-9]')
+            key_string = key_string_regex.sub('', f'barchart')
 
             metadata = {}
             metadata['metric'] = seleted_metric
