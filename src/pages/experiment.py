@@ -208,9 +208,9 @@ elif st.session_state['experiment_state'] == STATE_BAR_FIRST or \
 
     with title_con:
         if data is not None:
-            utils.center_title(f'Viewership of {data["Instance name"][1]}')
+            utils.center_title(f'Viewership of {data["Instance name"][1]}; Bar Plot')
         else:
-            utils.center_title(f'Viewership Visualisations')
+            utils.center_title(f'Viewership Visualisations; Bar Plot')
 
     with st.sidebar:
         if data is not None:
@@ -299,9 +299,9 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
 
     with title_con:
         if data is not None:
-            utils.center_title(f'Viewership of {data["Instance name"][1]}')
+            utils.center_title(f'Viewership of {data["Instance name"][1]}; Bubble Plot')
         else:
-            utils.center_title(f'Chapter Visualisations')
+            utils.center_title(f'Chapter Visualisations; Bubble Plot')
 
     with st.sidebar:
         if data is not None:
