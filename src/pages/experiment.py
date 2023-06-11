@@ -198,8 +198,8 @@ elif st.session_state['experiment_state'] == STATE_BAR_FIRST or \
 
     current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     parent_dir = os.path.dirname(current_dir)
-    viewership_build_dir = os.path.join(parent_dir, 'components/bar_component_build')
-    viewership_component_fun = components.declare_component('viewership_component', path=viewership_build_dir)
+    bar_plot_build_dir = os.path.join(parent_dir, 'components/bar_plot_component_build')
+    bar_plot_component_fun = components.declare_component('bar_plot_component', path=bar_plot_build_dir)
 
     title_con = st.container()
     component_con = st.container()
@@ -234,7 +234,7 @@ elif st.session_state['experiment_state'] == STATE_BAR_FIRST or \
 
             metadata['colour'] = colour_meta(data)
 
-            comp = viewership_component_fun(data=data, metadata=metadata, default=0, key=key_string)
+            comp = bar_plot_component_fun(data=data, metadata=metadata, default=0, key=key_string)
 
 
 elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
@@ -289,8 +289,8 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
 
     current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     parent_dir = os.path.dirname(current_dir)
-    chapter_build_dir = os.path.join(parent_dir, 'components/bubble_component_build')
-    chapter_component_fun = components.declare_component('chapter_component', path=chapter_build_dir)
+    bubble_plot_build_dir = os.path.join(parent_dir, 'components/bubble_plot_component_build')
+    bubble_plot_component_fun = components.declare_component('bubble_plot_component', path=bubble_plot_build_dir)
 
     title_con = st.container()
     component_con = st.container()
@@ -327,5 +327,5 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
 
             metadata['colour'] = colour_map
 
-            comp = chapter_component_fun(data=data, metadata=metadata, default=0, key=key_string)
+            comp = bubble_plot_component_fun(data=data, metadata=metadata, default=0, key=key_string)
 

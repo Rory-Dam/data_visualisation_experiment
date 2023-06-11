@@ -58,12 +58,12 @@ def format_data(data: pd.DataFrame, metric) -> pd.DataFrame:
 st.set_page_config(layout="wide")
 
 # DEVELOPMENT:
-# chapter_component_fun = components.declare_component('chapter_component', url='http://localhost:3001')
+# bubble_plot_component_fun = components.declare_component('bubble_plot_component', url='http://localhost:3001')
 # PRODUCTION BUILD:
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
-chapter_build_dir = os.path.join(parent_dir, 'components/bubble_component_build')
-chapter_component_fun = components.declare_component('chapter_component', path=chapter_build_dir)
+bubble_plot_build_dir = os.path.join(parent_dir, 'components/bubble_plot_component_build')
+bubble_plot_component_fun = components.declare_component('bubble_plot_component', path=bubble_plot_build_dir)
 
 title_con = st.container()
 component_con = st.container()
@@ -100,4 +100,4 @@ with component_con:
 
         metadata['colour'] = colour_map
 
-        comp = chapter_component_fun(data=data, metadata=metadata, default=0, key=key_string)
+        comp = bubble_plot_component_fun(data=data, metadata=metadata, default=0, key=key_string)
