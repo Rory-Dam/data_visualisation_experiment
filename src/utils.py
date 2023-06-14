@@ -1,31 +1,5 @@
 import streamlit as st
 
-CIA_COLOURS = {
-            'Twee teams': {
-                'introductie': '#FFF345',
-                'reality': '#F8C712',
-                'Opdracht': '#FEAB5F',
-                'eilandraad': '#E37F43',
-                'Idents': '#DB0064'
-            },
-            'samensmelting': {
-                'introductie': '#FDE9E6',
-                'reality': '#FCCFE3',
-                'Opdracht': '#EC9FC3',
-                'eilandraad': '#FF5CD3',
-                'Idents': '#9610AE'
-            },
-            'Finale': {
-                'introductie': '#EBF5FE',
-                'reality': '#74EAEE',
-                'Finale': '#188DED',
-                'Opdracht': '#12CDD4',
-                'eilandraad': '#02A7AD',
-                'Idents': '#414AB4'
-            }
-        }
-
-
 def center_st_col(size=1):
     _, middle_col, _ = st.columns([1, size, 1])
     return middle_col
