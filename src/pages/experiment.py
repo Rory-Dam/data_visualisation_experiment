@@ -213,10 +213,10 @@ elif st.session_state['experiment_state'] == STATE_BAR_FIRST or \
 
         for i, act in enumerate(format_structure):
             chapter_gradient = utils.brightness_range(colours[i], len(format_structure[act]),
-                                                    saturation_bounds=(0.6, 0.95),
-                                                    value_bounds=(1, 0.6),
-                                                    hue_shift_max=min(1/9, 1/len(format_structure)),
-                                                    use_linear_luminance_function=True)
+                                                        saturation_bounds=(0.35, 0.95),
+                                                        value_bounds=(1, 0.55),
+                                                        hue_shift_max=min(1/9, 1/len(format_structure)),
+                                                        use_linear_luminance_function=True)
             for j, chapter in enumerate(format_structure[act]):
                 format_structure[act][chapter] = chapter_gradient[j]
 
@@ -244,8 +244,8 @@ elif st.session_state['experiment_state'] == STATE_BAR_FIRST or \
         return format_structure
 
     get_metric_postfix = {'Kdh000': '',
-                      'Kdh%': '%',
-                      'Kta%': '%'}
+                            'Kdh%': '%',
+                            'Kta%': '%'}
 
 
     current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -273,6 +273,16 @@ elif st.session_state['experiment_state'] == STATE_BAR_FIRST or \
                 utils.center_title(f'Viewership of {data["Instance name"][1]}; Bar Plot')
             else:
                 utils.center_title(f'Viewership Visualisations; Bar Plot')
+
+        if st.session_state['experiment_state'] == STATE_BAR_FIRST_DEMO or \
+            st.session_state['experiment_state'] == STATE_BAR_SECOND_DEMO:
+            st.text('Every bar is a segment, its height is determined by viewership and its width by duration.\n' + \
+                    'The episodes are displayed in chronological order.\n' + \
+                    'Colours indicate act and chapter, act is determined by hue, chapter by brightness.\n' + \
+                    'By hovering over a bar details about that segment get displayed.\n' + \
+                    'Zoom in on any number of episodes using the slider below the visualisation.\n' + \
+                    'The select-boxes on the left can be used to select different metrics and granularities.\n' + \
+                    'Higher granularity levels are useful for looking at averages or trends over episodes or acts.')
 
     with st.sidebar:
         if data is not None:
@@ -355,8 +365,8 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
         return ordered_data
 
     get_metric_postfix = {'Kdh000': '',
-                      'Kdh%': '%',
-                      'Kta%': '%'}
+                            'Kdh%': '%',
+                            'Kta%': '%'}
 
 
     current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -370,8 +380,10 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
     if st.session_state['experiment_state'] == STATE_BUBBLE_FIRST_DEMO or \
         st.session_state['experiment_state'] == STATE_BUBBLE_SECOND_DEMO:
         data = pd.read_csv(os.path.join(os.path.dirname(parent_dir), 'public/demo.csv'))
+        file_name = 'demo.csv'
     else:
         data = pd.read_csv(os.path.join(os.path.dirname(parent_dir), 'public/experiment.csv'))
+        file_name = 'experiment.csv'
 
     with title_con:
         if st.session_state['experiment_state'] == STATE_BUBBLE_FIRST_DEMO or \
@@ -383,6 +395,17 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
             else:
                 utils.center_title(f'Viewership Visualisations; Bar Plot')
 
+        if st.session_state['experiment_state'] == STATE_BUBBLE_FIRST_DEMO or \
+            st.session_state['experiment_state'] == STATE_BUBBLE_SECOND_DEMO:
+            st.text('Every bubble is a segment, its height is determined by viewership and its are by duration.\n' + \
+                    'By hovering over a bubble details about that segment get displayed.\n' + \
+                    'The segments are grouped by chapter.\n' + \
+                    'Press the \"To Episode View\" button below the visualisation to switch to a chronological ordering.\n' + \
+                    'In the episode view acts are differentiated by background colour.\n' + \
+                    'Every chapter can be toggled of and on by clicking the corresponding coloured buttons.\n' + \
+                    'Zoom in on any part of the y-axis by scrolling and dragging in the plot area.\n' + \
+                    'The select-box on the left can be used to select different metrics.')
+
     with st.sidebar:
         if data is not None:
             seleted_metric = st.selectbox('Data metric', ['Kdh000', 'Kdh%', 'Kta%'])
@@ -391,7 +414,7 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
     with component_con:
         if data is not None:
             key_string_regex = re.compile('[^a-zA-Z0-9]')
-            key_string = key_string_regex.sub('', f'barchart')
+            key_string = key_string_regex.sub('', f'barchart{file_name}')
 
             metadata = {}
             metadata['metric'] = seleted_metric
