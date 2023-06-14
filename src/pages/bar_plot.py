@@ -239,6 +239,6 @@ with component_con:
         chapters = data['chapter'].unique()
         metadata['chapter_order'] = list(chapters)
 
-        metadata['colour'] = colour_meta(data)
+        metadata['colour'] = manual_colour_meta(data)
 
         comp = bar_plot_component_fun(data=data, metadata=metadata, default=0, key=key_string)
