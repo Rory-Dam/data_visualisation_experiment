@@ -253,166 +253,52 @@ def brightness_range(colour_hex: tuple[int, int, int],
 
     return gradient
 
+def manual_colour_scheme(palettes: list[int], range_sizes: list[int]) -> list[list[str]]:
+    '''Provide a colour scheme based on manually fine-tuned colours.
 
-def colour_map(shape_dict: dict, saturation_bounds=(0.5, 0.9), value_bounds=(1, 0.7),
-               hue_shift_factor=0.8, use_linear_luminance_function=False, no_acts=False):
+    Arguments:
+    palettes -- List of integers between 0 and 4 indicating which colour ranges should be used.
+             or Integer indicating how many colour ranges should be used,
+                the colours will be picked in a pre-determined order.
+    range_sizes --  List of integers between 1 and 8 indication how many colour should be used in each corresponding range.
+                or  Integer between 1 and 8 indication how many colour should be used in every range.
     '''
-    Generate a rainbow colourmap based on the given structure dictionary.
 
-    The use_linear_luminance_function option is adviced to use when there are a
-    small number of acts and chapters per act.
-    '''
-    import colorsys as cs
-    import numpy as np
-    import math
+    COLOURS = [['#E8E5FF', '#CFC9FF', '#A89FEE', '#746AD6', '#2489FF', '#4558FF', '#0015CE', '#000C7C'],
+               ['#FFF345', '#FFCE18', '#FEAA61', '#E37F43', '#FF624D', '#F03434', '#C00606', '#740035'],
+               ['#EBFFE5', '#D0FFC1', '#AFF09A', '#9BD987', '#00FFD2', '#04E4BC', '#009E82', '#00473B'],
+               ['#FFD9F5', '#F2B0CD', '#FF8BC1', '#E745BB', '#FB2FFF', '#CE01D2', '#930096', '#5B006B'],
+               ['#C7F5FF', '#C7F5FF', '#12CDD4', '#02B3BA', '#00C2ED', '#00A1C5', '#006981', '#003444']]
 
-    LUMINANCE_BREAK_POINTS = [0, 1/6, 1/3, 1/2, 2/3, 5/6, 1]
-    # differentiate: 26.64 x^2+ 0 x+ 0.195,
-    #                17/2 x^2 - 17/3 x + 493/300
-    #                300/97 x^2 - 200/97 x + 10163/9700
-    #                21.6 x^2 - 34.8 x + 11.665
-    #                15.66 x^2 - 20.88 x + 7.025
-    #                10.98 x^2 - 21.96 x + 11.175
-    LUMINANCE_SLOPES = [lambda hue: 53.28 * hue,
-                           lambda hue: 17 * hue - 17/3,
-                           lambda hue: 600/97 * hue - 200/97,
-                           lambda hue: 43.2 * hue - 34.8,
-                           lambda hue: 31.32 * hue - 20.88,
-                           lambda hue: 21.96 * hue - 21.96
-                           ]
-    MAX_LUMINANCE_SLOPE = abs(max([LUMINANCE_SLOPES[0](LUMINANCE_BREAK_POINTS[1]),
-                              LUMINANCE_SLOPES[1](LUMINANCE_BREAK_POINTS[1]),
-                              LUMINANCE_SLOPES[2](LUMINANCE_BREAK_POINTS[3]),
-                              LUMINANCE_SLOPES[3](LUMINANCE_BREAK_POINTS[3]),
-                              LUMINANCE_SLOPES[4](LUMINANCE_BREAK_POINTS[5]),
-                              LUMINANCE_SLOPES[5](LUMINANCE_BREAK_POINTS[5])], key=abs))
+    COLOUR_ORDERS = [[[4], [4,5], [3,4,5], [3,4,5,6], [2,3,4,5,6], [1,2,3,4,5,6], [1,2,3,4,5,6,7], [0,1,2,3,4,5,6,7]],
+                     [[4], [4,5], [4,5,6], [2,4,5,6], [1,2,4,5,6], [1,2,3,4,5,6], [0,1,2,3,4,5,6], [0,1,2,3,4,5,6,7]],
+                     [[5], [4,5], [4,5,6], [3,4,5,6], [2,3,4,5,6], [1,2,3,4,5,6], [1,2,3,4,5,6,7], [0,1,2,3,4,5,6,7]],
+                     [[4], [4,5], [3,4,5], [2,3,4,5], [2,3,4,5,6], [1,2,3,4,5,6], [1,2,3,4,5,6,7], [0,1,2,3,4,5,6,7]],
+                     [[4], [4,5], [2,4,5], [2,3,4,5], [2,3,4,5,6], [1,2,3,4,5,6], [1,2,3,4,5,6,7], [0,1,2,3,4,5,6,7]]]
 
-    LIN_LUMINANCE_SLOPES = [4.41,
-                        -1.83,
-                        0.54,
-                        -4.35,
-                        2.61,
-                        -1.83
-                        ]
+    NUM_RANGES = 5
+    MAX_RANGE_SIZE = 8
 
-    LIN_MAX_LUMINANCE_SLOPE = abs(max(LIN_LUMINANCE_SLOPES, key=abs))
+    if type(palettes) == int:
+        palettes = [i % 5 for i in range(palettes)]
+    elif max(palettes) > NUM_RANGES-1:
+            return -1
 
-    NORMALIZE_BREAK_POINTS = [0, 8/27, 8/18, 1]
+    if type(range_sizes) == int:
+        if range_sizes > MAX_RANGE_SIZE:
+            return -1
 
-    def shift_hue(hue, luminance_direction, max_shift):
-        # percenption of hues, for hues of different acts:
-        # https://dominoweb.draco.res.ibm.com/reports/rc24542.pdf
-        def slope_percieved_luminance(hue):
-            if hue < LUMINANCE_BREAK_POINTS[1]:
-                return LUMINANCE_SLOPES[0](hue)
+        range_sizes = [range_sizes] * len(palettes)
+    elif max(range_sizes) > MAX_RANGE_SIZE:
+            return -1
 
-            if hue < LUMINANCE_BREAK_POINTS[2]:
-                return LUMINANCE_SLOPES[1](hue)
+    if len(palettes) != len(range_sizes):
+        return -1
 
-            if hue < LUMINANCE_BREAK_POINTS[3]:
-                return LUMINANCE_SLOPES[2](hue)
+    colour_scheme = []
+    for palette, size in zip(palettes, range_sizes):
+        colour_indices = COLOUR_ORDERS[palette][size-1]
 
-            if hue < LUMINANCE_BREAK_POINTS[4]:
-                return LUMINANCE_SLOPES[3](hue)
+        colour_scheme.append([COLOURS[palette][i] for i in colour_indices])
 
-            if hue < LUMINANCE_BREAK_POINTS[5]:
-                return LUMINANCE_SLOPES[4](hue)
-
-            return LUMINANCE_SLOPES[5](hue)
-
-        def lin_slope_percieved_luminance(hue):
-            if hue < LUMINANCE_BREAK_POINTS[1]:
-                return LIN_LUMINANCE_SLOPES[0]
-
-            if hue < LUMINANCE_BREAK_POINTS[2]:
-                return LIN_LUMINANCE_SLOPES[1]
-
-            if hue < LUMINANCE_BREAK_POINTS[3]:
-                return LIN_LUMINANCE_SLOPES[2]
-
-            if hue < LUMINANCE_BREAK_POINTS[4]:
-                return LIN_LUMINANCE_SLOPES[3]
-
-            if hue < LUMINANCE_BREAK_POINTS[5]:
-                return LIN_LUMINANCE_SLOPES[4]
-
-            return LIN_LUMINANCE_SLOPES[5]
-
-        if luminance_direction == 0:
-            return hue
-
-        slope = slope_percieved_luminance(hue)
-        if use_linear_luminance_function:
-            slope = lin_slope_percieved_luminance(hue)
-
-        if slope == 0:
-            return hue
-
-        hue_direction = luminance_direction * slope
-
-        if hue_direction > 0:
-            closest_break_point = [point for point in LUMINANCE_BREAK_POINTS if point > hue][0]
-        else:
-            closest_break_point = [point for point in LUMINANCE_BREAK_POINTS if point < hue][-1]
-
-        break_point_distance = closest_break_point - hue
-        max_slope = MAX_LUMINANCE_SLOPE
-        if use_linear_luminance_function:
-            max_slope = LIN_MAX_LUMINANCE_SLOPE
-
-        hue_diff = min(break_point_distance * abs(luminance_direction), max_shift / 2 * abs(luminance_direction) * hue_direction/abs(hue_direction), key=abs) \
-                            * hue_shift_factor * (1 - (abs(slope) / max_slope))
-
-        return hue + hue_diff
-
-    def luminance_directions(n):
-        divisor = math.floor(n / 2)
-        directions = [(divisor - i) / divisor for i in range(divisor)]
-        if n % 2:
-            directions.append(0)
-
-        inverse = [-(i + 1) / divisor for i in range(divisor)]
-        directions.extend(inverse)
-        return directions
-
-    def normalize_hue(hue):
-        if hue < NORMALIZE_BREAK_POINTS[1]:
-            return (3/4) * hue
-        if hue < NORMALIZE_BREAK_POINTS[2]:
-            return (3/2) * hue - 4/18
-        else:
-            return hue
-
-
-    if no_acts:
-        num_chapters = len(shape_dict)
-        hue_space = [normalize_hue(hue) for hue in np.linspace(1/(num_chapters*10), 1, num_chapters, endpoint=False)]
-
-        saturation = saturation_bounds[0] * 0.4 + saturation_bounds[1] * 0.6
-        value = value_bounds[0] * 0.6 + value_bounds[1] * 0.4
-
-        for i, chapter in enumerate(shape_dict):
-            hue = hue_space[i]
-            decimal_r, decimal_g, decimal_b = cs.hsv_to_rgb(hue, saturation, value)
-            r, g, b = int(decimal_r*255), int(decimal_g*255), int(decimal_b*255)
-            shape_dict[chapter] = rgb_to_hex(r, g, b)
-
-    else:
-        num_acts = len(shape_dict)
-        hue_space = [normalize_hue(hue) for hue in np.linspace(1/(num_acts*10), 1, num_acts, endpoint=False)]
-
-        for i, act in enumerate(shape_dict):
-            num_chapters = len(shape_dict[act])
-            saturation_space = np.linspace(saturation_bounds[0], saturation_bounds[1], num_chapters, endpoint=True)
-            value_space = np.linspace(value_bounds[0], value_bounds[1], num_chapters, endpoint=True)
-            directions = luminance_directions(num_chapters)
-
-            for j, chapter in enumerate(shape_dict[act]):
-                hue = shift_hue(hue_space[i], directions[j], 1/num_acts)
-                saturation = saturation_space[j]
-                value = value_space[j]
-                decimal_r, decimal_g, decimal_b = cs.hsv_to_rgb(hue, saturation, value)
-                r, g, b = int(decimal_r*255), int(decimal_g*255), int(decimal_b*255)
-                shape_dict[act][chapter] = rgb_to_hex(r, g, b)
-
-    return shape_dict
+    return colour_scheme

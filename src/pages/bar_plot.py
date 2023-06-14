@@ -176,6 +176,28 @@ def colour_meta(data: pd.DataFrame):
     return format_structure
 
 
+def manual_colour_meta(data: pd.DataFrame):
+    acts = data['act'].unique()
+    all_chapters = data['chapter'].unique()
+    format_structure = dict.fromkeys(acts, None)
+    for act in format_structure:
+        act_chapters = data[data['act'] == act]['chapter'].unique()
+        chapters_in_order = []
+        for chapter in all_chapters:
+            if chapter in act_chapters:
+                chapters_in_order.append(chapter)
+
+        format_structure[act] = dict.fromkeys(chapters_in_order)
+
+    colours = utils.manual_colour_scheme(len(acts), [len(format_structure[act]) for act in format_structure])
+
+    for i, act in enumerate(format_structure):
+        for j, chapter in enumerate(format_structure[act]):
+            format_structure[act][chapter] = colours[i][j]
+
+    return format_structure
+
+
 st.set_page_config(layout="wide")
 
 # DEVELOPMENT:
