@@ -54,6 +54,10 @@ def format_data(data: pd.DataFrame, metric) -> pd.DataFrame:
 
     return ordered_data
 
+get_metric_postfix = {'Kdh000': '',
+                      'Kdh%': '%',
+                      'Kta%': '%'}
+
 
 st.set_page_config(layout="wide")
 
@@ -88,6 +92,7 @@ with component_con:
 
         metadata = {}
         metadata['metric'] = seleted_metric
+        metadata['metric_postfix'] = get_metric_postfix[seleted_metric]
 
         chapters = data['chapter'].unique()
         metadata['chapter_order'] = list(chapters)
@@ -99,5 +104,15 @@ with component_con:
             colour_map[chapter] = colours[i]
 
         metadata['colour'] = colour_map
+
+        acts = data['act'].unique()
+
+        act_colour_map = {}
+        act_colours = utils.manual_colour_scheme(len(acts), 8)
+
+        for i, act in enumerate(acts):
+            act_colour_map[act] = act_colours[i][2]
+
+        metadata['act_colour'] = act_colour_map
 
         comp = bubble_plot_component_fun(data=data, metadata=metadata, default=0, key=key_string)

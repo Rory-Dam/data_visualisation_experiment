@@ -1,0 +1,21 @@
+Instance name,Episode name,Act,Chapter,Segment,Start Time (seconds),End Time (seconds),SKO minutes,Kdh000,Kdh%,Kta%
+Series X,1,Act 1,Intro,Segment,0,,10,600000,10.0,15.0
+Series X,1,Act 1,Body,Segment,600,,20,1440000,12.0,17.0
+Series X,1,Act 1,Advertisment,Segment,1800,,5,270000,9.0,13.0
+Series X,1,Act 1,Body,Segment,2100,,20,1680000,14.0,20.0
+Series X,1,Act 1,Outro,Segment,3300,,5,390000,13.0,18.0
+Series X,2,Act 2,Intro,Segment,0,,10,540000,9.0,14.0
+Series X,2,Act 2,Body,Segment,600,,20,1320000,11.0,16.0
+Series X,2,Act 2,Advertisment,Segment,1800,,5,255000,8.5,12.0
+Series X,2,Act 2,Body,Segment,2100,,20,1560000,13.0,18.0
+Series X,2,Act 2,Outro,Segment,3300,,5,360000,12.0,17.0
+Series X,3,Act 2,Intro,Segment,0,,10,720000,12.0,16.0
+Series X,3,Act 2,Body,Segment,600,,20,1560000,13.0,18.0
+Series X,3,Act 2,Advertisment,Segment,1800,,5,300000,10.0,14.0
+Series X,3,Act 2,Body,Segment,2100,,20,1860000,15.5,21.5
+Series X,3,Act 2,Outro,Segment,3300,,5,420000,14.0,20.0
+Series X,4,Act 3,Intro,Segment,0,,10,780000,13.0,17.0
+Series X,4,Act 3,Body,Segment,600,,20,1740000,14.5,20.5
+Series X,4,Act 3,Advertisment,Segment,1800,,5,315000,10.5,15.0
+Series X,4,Act 3,Body,Segment,2100,,20,1800000,15.0,21.0
+Series X,4,Act 3,Outro,Segment,3300,,5,435000,14.5,20.5

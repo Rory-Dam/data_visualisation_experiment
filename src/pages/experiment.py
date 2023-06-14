@@ -7,17 +7,40 @@ import pandas as pd
 import re
 import utils
 
-STATE_BAR_FIRST = 0
-STATE_BUBBLE_FIRST = 1
-STATE_BUBBLE_SECOND = 2
-STATE_BAR_SECOND = 3
-STATE_END = 4
+STATE_BAR_FIRST_DEMO = 0
+STATE_BAR_FIRST = 2
+STATE_BUBBLE_SECOND_DEMO = 4
+STATE_BUBBLE_SECOND = 6
+
+STATE_BUBBLE_FIRST_DEMO = 1
+STATE_BUBBLE_FIRST = 3
+STATE_BAR_SECOND_DEMO = 5
+STATE_BAR_SECOND = 7
+
+STATE_END = 8
 
 st.set_page_config(layout="wide")
 
 if 'experiment_state' not in st.session_state:
-    st.session_state['experiment_state'] = np.random.randint(0,2)
-    st.experimental_rerun()
+    current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    parent_dir = os.path.dirname(current_dir)
+    try:
+        state_file = open(os.path.join(os.path.dirname(parent_dir), './public/state.txt'),"r")
+        state = int(state_file.read())
+
+        state_file = open(os.path.join(os.path.dirname(parent_dir), './public/state.txt'),"w")
+        st.session_state['experiment_state'] = state
+        state_file.write(str((state+1) % 2))
+    except:
+        state = np.random.randint(0,2)
+        st.session_state['experiment_state'] = state
+        try:
+            state_file = open(os.path.join(os.path.dirname(parent_dir), './public/state.txt'),"w")
+            state_file.write(str((state+1) % 2))
+        except:
+            print('ERROR!\nState.txt must be fixed.')
+    finally:
+        st.experimental_rerun()
 
 with st.sidebar:
     if st.button('Next Visualisation'):
@@ -25,9 +48,13 @@ with st.sidebar:
 
 if st.session_state['experiment_state'] >= STATE_END:
     st.title('Thank you for participating in the experiment')
+    st.text('Feel free to play around with the two visualisations,\n' + \
+            'they can be accesed through the side bar on the left')
 
 elif st.session_state['experiment_state'] == STATE_BAR_FIRST or \
-     st.session_state['experiment_state'] == STATE_BAR_SECOND:
+     st.session_state['experiment_state'] == STATE_BAR_FIRST_DEMO or \
+     st.session_state['experiment_state'] == STATE_BAR_SECOND or \
+     st.session_state['experiment_state'] == STATE_BAR_SECOND_DEMO:
     def format_data(data: pd.DataFrame, metric) -> pd.DataFrame:
         def times_abs2rel(times, start_time, end_time):
             times = [int(time) for time in times]
@@ -195,6 +222,31 @@ elif st.session_state['experiment_state'] == STATE_BAR_FIRST or \
 
         return format_structure
 
+    def manual_colour_meta(data: pd.DataFrame):
+        acts = data['act'].unique()
+        all_chapters = data['chapter'].unique()
+        format_structure = dict.fromkeys(acts, None)
+        for act in format_structure:
+            act_chapters = data[data['act'] == act]['chapter'].unique()
+            chapters_in_order = []
+            for chapter in all_chapters:
+                if chapter in act_chapters:
+                    chapters_in_order.append(chapter)
+
+            format_structure[act] = dict.fromkeys(chapters_in_order)
+
+        colours = utils.manual_colour_scheme(len(acts), [len(format_structure[act]) for act in format_structure])
+
+        for i, act in enumerate(format_structure):
+            for j, chapter in enumerate(format_structure[act]):
+                format_structure[act][chapter] = colours[i][j]
+
+        return format_structure
+
+    get_metric_postfix = {'Kdh000': '',
+                      'Kdh%': '%',
+                      'Kta%': '%'}
+
 
     current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     parent_dir = os.path.dirname(current_dir)
@@ -204,13 +256,23 @@ elif st.session_state['experiment_state'] == STATE_BAR_FIRST or \
     title_con = st.container()
     component_con = st.container()
 
-    data = pd.read_csv(os.path.join(os.path.dirname(parent_dir), 'public/experiment.csv'))
+    if st.session_state['experiment_state'] == STATE_BAR_FIRST_DEMO or \
+        st.session_state['experiment_state'] == STATE_BAR_SECOND_DEMO:
+        data = pd.read_csv(os.path.join(os.path.dirname(parent_dir), 'public/demo.csv'))
+        file_name = 'demo.csv'
+    else:
+        data = pd.read_csv(os.path.join(os.path.dirname(parent_dir), 'public/experiment.csv'))
+        file_name = 'experiment.csv'
 
     with title_con:
-        if data is not None:
-            utils.center_title(f'Viewership of {data["Instance name"][1]}; Bar Plot')
+        if st.session_state['experiment_state'] == STATE_BAR_FIRST_DEMO or \
+            st.session_state['experiment_state'] == STATE_BAR_SECOND_DEMO:
+            utils.center_title('Demo; Bar Plot')
         else:
-            utils.center_title(f'Viewership Visualisations; Bar Plot')
+            if data is not None:
+                utils.center_title(f'Viewership of {data["Instance name"][1]}; Bar Plot')
+            else:
+                utils.center_title(f'Viewership Visualisations; Bar Plot')
 
     with st.sidebar:
         if data is not None:
@@ -223,22 +285,28 @@ elif st.session_state['experiment_state'] == STATE_BAR_FIRST or \
     with component_con:
         if data is not None:
             key_string_regex = re.compile('[^a-zA-Z0-9]')
-            key_string = key_string_regex.sub('', f'barchart')
+            # Use the filename in the key to remount the component when using a different file,
+            # so swapping from demo to real visualisation.
+            key_string = key_string_regex.sub('', f'barchart_{file_name}')
 
             metadata = {}
             metadata['metric'] = seleted_metric
+            metadata['metric_postfix'] = get_metric_postfix[seleted_metric]
             metadata['granularity'] = seleted_granularity
 
             chapters = data['chapter'].unique()
             metadata['chapter_order'] = list(chapters)
 
+            # metadata['colour'] = manual_colour_meta(data)
             metadata['colour'] = colour_meta(data)
 
             comp = bar_plot_component_fun(data=data, metadata=metadata, default=0, key=key_string)
 
 
 elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
-     st.session_state['experiment_state'] == STATE_BUBBLE_SECOND:
+     st.session_state['experiment_state'] == STATE_BUBBLE_FIRST_DEMO or \
+     st.session_state['experiment_state'] == STATE_BUBBLE_SECOND or \
+     st.session_state['experiment_state'] == STATE_BUBBLE_SECOND_DEMO:
     def format_data(data: pd.DataFrame, metric) -> pd.DataFrame:
         if data is None:
             return None
@@ -286,6 +354,10 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
 
         return ordered_data
 
+    get_metric_postfix = {'Kdh000': '',
+                      'Kdh%': '%',
+                      'Kta%': '%'}
+
 
     current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     parent_dir = os.path.dirname(current_dir)
@@ -295,13 +367,21 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
     title_con = st.container()
     component_con = st.container()
 
-    data = pd.read_csv(os.path.join(os.path.dirname(parent_dir), 'public/experiment.csv'))
+    if st.session_state['experiment_state'] == STATE_BUBBLE_FIRST_DEMO or \
+        st.session_state['experiment_state'] == STATE_BUBBLE_SECOND_DEMO:
+        data = pd.read_csv(os.path.join(os.path.dirname(parent_dir), 'public/demo.csv'))
+    else:
+        data = pd.read_csv(os.path.join(os.path.dirname(parent_dir), 'public/experiment.csv'))
 
     with title_con:
-        if data is not None:
-            utils.center_title(f'Viewership of {data["Instance name"][1]}; Bubble Plot')
+        if st.session_state['experiment_state'] == STATE_BUBBLE_FIRST_DEMO or \
+            st.session_state['experiment_state'] == STATE_BUBBLE_SECOND_DEMO:
+            utils.center_title('Demo; Bar Plot')
         else:
-            utils.center_title(f'Chapter Visualisations; Bubble Plot')
+            if data is not None:
+                utils.center_title(f'Viewership of {data["Instance name"][1]}; Bar Plot')
+            else:
+                utils.center_title(f'Viewership Visualisations; Bar Plot')
 
     with st.sidebar:
         if data is not None:
@@ -315,6 +395,7 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
 
             metadata = {}
             metadata['metric'] = seleted_metric
+            metadata['metric_postfix'] = get_metric_postfix[seleted_metric]
 
             chapters = data['chapter'].unique()
             metadata['chapter_order'] = list(chapters)
@@ -326,6 +407,16 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
                 colour_map[chapter] = colours[i]
 
             metadata['colour'] = colour_map
+
+            acts = data['act'].unique()
+
+            act_colour_map = {}
+            act_colours = utils.manual_colour_scheme(len(acts), 8)
+
+            for i, act in enumerate(acts):
+                act_colour_map[act] = act_colours[i][2]
+
+            metadata['act_colour'] = act_colour_map
 
             comp = bubble_plot_component_fun(data=data, metadata=metadata, default=0, key=key_string)
 

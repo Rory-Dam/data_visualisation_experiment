@@ -197,6 +197,9 @@ def manual_colour_meta(data: pd.DataFrame):
 
     return format_structure
 
+get_metric_postfix = {'Kdh000': '',
+                      'Kdh%': '%',
+                      'Kta%': '%'}
 
 st.set_page_config(layout="wide")
 
@@ -234,6 +237,7 @@ with component_con:
 
         metadata = {}
         metadata['metric'] = seleted_metric
+        metadata['metric_postfix'] = get_metric_postfix[seleted_metric]
         metadata['granularity'] = seleted_granularity
 
         chapters = data['chapter'].unique()
