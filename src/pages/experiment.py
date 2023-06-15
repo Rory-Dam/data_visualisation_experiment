@@ -307,8 +307,8 @@ elif st.session_state['experiment_state'] == STATE_BAR_FIRST or \
             chapters = data['chapter'].unique()
             metadata['chapter_order'] = list(chapters)
 
-            # metadata['colour'] = manual_colour_meta(data)
-            metadata['colour'] = colour_meta(data)
+            metadata['colour'] = manual_colour_meta(data)
+            # metadata['colour'] = colour_meta(data)
 
             comp = bar_plot_component_fun(data=data, metadata=metadata, default=0, key=key_string)
 
@@ -424,17 +424,17 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
             metadata['chapter_order'] = list(chapters)
 
             colour_map = {}
-            colours = utils.normalised_hue_range(len(chapters))
+            colours = utils.manual_colour_scheme(len(chapters), 1)
 
             for i, chapter in enumerate(chapters):
-                colour_map[chapter] = colours[i]
+                colour_map[chapter] = colours[i][0]
 
             metadata['colour'] = colour_map
 
             acts = data['act'].unique()
 
             act_colour_map = {}
-            act_colours = utils.manual_colour_scheme(len(acts), 8)
+            act_colours = utils.manual_colour_scheme(len(acts)*2, 8)[::2]
 
             for i, act in enumerate(acts):
                 act_colour_map[act] = act_colours[i][2]

@@ -237,25 +237,20 @@ def manual_colour_scheme(palettes: list[int], range_sizes: list[int]) -> list[li
     range_sizes --  List of integers between 1 and 8 indication how many colour should be used in each corresponding range.
                 or  Integer between 1 and 8 indication how many colour should be used in every range.
     '''
+    COLOURS = [['#FFEFE1', '#FFDCBE', '#F0B582', '#FF983E', '#E37D24', '#B65501', '#763700', '#421F00'],
+               ['#FFD9F5', '#F8B1D1', '#FF8BC1', '#FF6CB1', '#F3368E', '#C61065', '#940447', '#530027'],
+               ['#C7F5FF', '#93DFEF', '#88D2E1', '#63BDD0', '#3E96A9', '#197083', '#004B5B', '#002C35'],
+               ['#E2FFDA', '#BFFFAB', '#9EEE85', '#6EC353', '#429926', '#227C05', '#114800', '#030E00'],
+               ['#FFFAB0', '#EEF087', '#DDE057', '#D3D63F', '#ACAF16', '#767805', '#4B4D02', '#2E2F00'],
+               ['#F4E3FF', '#DCBCF2', '#BE82E5', '#A45CD3', '#8E2FCD', '#55068A', '#3A0061', '#1E0032']]
 
-    COLOURS = [['#E8E5FF', '#CFC9FF', '#A89FEE', '#746AD6', '#2489FF', '#4558FF', '#0015CE', '#000C7C'],
-               ['#FFF345', '#FFCE18', '#FEAA61', '#E37F43', '#FF624D', '#F03434', '#C00606', '#740035'],
-               ['#EBFFE5', '#D0FFC1', '#AFF09A', '#9BD987', '#00FFD2', '#04E4BC', '#009E82', '#00473B'],
-               ['#FFD9F5', '#F2B0CD', '#FF8BC1', '#E745BB', '#FB2FFF', '#CE01D2', '#930096', '#5B006B'],
-               ['#C7F5FF', '#C7F5FF', '#12CDD4', '#02B3BA', '#00C2ED', '#00A1C5', '#006981', '#003444']]
+    COLOUR_ORDERS = [[3], [1,3], [1,3,5], [1,3,5,6], [0,1,3,5,6], [0,1,2,3,5,6], [0,1,2,3,4,5,6], [0,1,2,3,4,5,6,7]]
 
-    # COLOUR_ORDERS = [[[4], [4,5], [2,4,5], [2,3,4,5], [1,2,3,4,5], [0,1,2,3,4,5], [0,1,2,3,4,5,6], [0,1,2,3,4,5,6,7]],
-    #                  [[4], [4,5], [2,4,5], [2,3,4,5], [1,2,3,4,5], [0,1,2,3,4,5], [0,1,2,3,4,5,6], [0,1,2,3,4,5,6,7]],
-    #                  [[5], [3,5], [2,3,5], [2,3,4,5], [1,2,3,4,5], [1,2,3,4,5,6], [0,1,2,3,4,5,6], [0,1,2,3,4,5,6,7]],
-    #                  [[4], [4,5], [2,4,5], [2,3,4,5], [1,2,3,4,5], [0,1,2,3,4,5], [0,1,2,3,4,5,6], [0,1,2,3,4,5,6,7]],
-    #                  [[4], [2,4], [1,2,4], [1,2,4,5], [1,2,3,4,5], [0,1,2,3,4,5], [0,1,2,3,4,5,6], [0,1,2,3,4,5,6,7]]]
-    COLOUR_ORDERS = [[3], [3,4], [3,4,5], [2,3,4,5], [1,2,3,4,5], [1,2,3,4,5,6], [0,1,2,3,4,5,6], [0,1,2,3,4,5,6,7]]
-
-    NUM_RANGES = 5
+    NUM_RANGES = 6
     MAX_RANGE_SIZE = 8
 
     if type(palettes) == int:
-        palettes = [i % 5 for i in range(palettes)]
+        palettes = [i % 6 for i in range(palettes)]
     elif max(palettes) > NUM_RANGES-1:
             return -1
 
