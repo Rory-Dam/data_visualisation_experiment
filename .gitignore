@@ -1,4 +1,5 @@
 .DS_Store
+results/
 *_old
 
 # Byte-compiled / optimized / DLL files

@@ -388,12 +388,12 @@ elif st.session_state['experiment_state'] == STATE_BUBBLE_FIRST or \
     with title_con:
         if st.session_state['experiment_state'] == STATE_BUBBLE_FIRST_DEMO or \
             st.session_state['experiment_state'] == STATE_BUBBLE_SECOND_DEMO:
-            utils.center_title('Demo; Bar Plot')
+            utils.center_title('Demo; Bubble Plot')
         else:
             if data is not None:
-                utils.center_title(f'Viewership of {data["Instance name"][1]}; Bar Plot')
+                utils.center_title(f'Viewership of {data["Instance name"][1]}; Bubble Plot')
             else:
-                utils.center_title(f'Viewership Visualisations; Bar Plot')
+                utils.center_title(f'Viewership Visualisations; Bubble Plot')
 
         if st.session_state['experiment_state'] == STATE_BUBBLE_FIRST_DEMO or \
             st.session_state['experiment_state'] == STATE_BUBBLE_SECOND_DEMO:
