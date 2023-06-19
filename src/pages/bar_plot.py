@@ -14,7 +14,8 @@ def format_data(data: pd.DataFrame, metric) -> pd.DataFrame:
         start_time = int(start_time)
         end_time = int(end_time)
 
-        rel_times = list(map(lambda time: (time - start_time) / (end_time - start_time), times))
+        rel_times = list(
+            map(lambda time: (time - start_time) / (end_time - start_time), times))
 
         return rel_times
 
@@ -22,14 +23,16 @@ def format_data(data: pd.DataFrame, metric) -> pd.DataFrame:
         return None
 
     if metric not in data.keys():
-        st.error(f'''Selected file has no {metric}. Columns: {list(data.keys())}''', icon='🚨')
+        st.error(
+            f'''Selected file has no {metric}. Columns: {list(data.keys())}''', icon='🚨')
         return
 
     for i, col_type in enumerate(data.dtypes):
         if np.issubdtype(col_type, np.number):
             data[data.keys()[i]].fillna(0)
 
-    columns = ['episode', 'act', 'chapter', 'segment', 'start_time', 'end_time', 'viewership']
+    columns = ['episode', 'act', 'chapter', 'segment',
+               'start_time', 'end_time', 'viewership']
     formatted_data = pd.DataFrame(columns=columns)
 
     formatted_data['episode'] = data['Episode name'].astype(int)
@@ -48,7 +51,8 @@ def format_data(data: pd.DataFrame, metric) -> pd.DataFrame:
     for _, group in data.groupby('Episode name'):
         # Since end times are not in the fucking file I do it like this.
         episode_start_times = times_abs2rel(group['Start Time (seconds)'],
-                                            group['Start Time (seconds)'].head(1).item(),
+                                            group['Start Time (seconds)'].head(
+                                                1).item(),
                                             group['Start Time (seconds)'].tail(1).item() + 60)
         episode_end_times = episode_start_times[1:].copy()
         episode_end_times.append(1)
@@ -90,13 +94,15 @@ def granulate_data(data: pd.DataFrame, granularity):
                     col_chapter.append(curr_chapter)
                     col_start_time.append(curr_start_time)
                     col_end_time.append(row['start_time'])
-                    col_viewership.append(curr_viewer_seconds_sum/(col_end_time[-1] - col_start_time[-1]))
+                    col_viewership.append(
+                        curr_viewer_seconds_sum/(col_end_time[-1] - col_start_time[-1]))
 
                     curr_chapter = row['chapter']
                     curr_start_time = row['start_time']
                     curr_viewer_seconds_sum = 0
 
-                curr_viewer_seconds_sum += row['viewership'] * (row['end_time'] - row['start_time'])
+                curr_viewer_seconds_sum += row['viewership'] * \
+                    (row['end_time'] - row['start_time'])
 
             col_episode.append(episode_name)
             col_act.append(row['act'])
@@ -104,7 +110,8 @@ def granulate_data(data: pd.DataFrame, granularity):
             col_segment.append('NVT')
             col_start_time.append(curr_start_time)
             col_end_time.append(row['end_time'])
-            col_viewership.append(curr_viewer_seconds_sum/(col_end_time[-1] - col_start_time[-1]))
+            col_viewership.append(
+                curr_viewer_seconds_sum/(col_end_time[-1] - col_start_time[-1]))
 
     elif granularity == 'episode':
         for name, group in data.groupby('episode'):
@@ -144,7 +151,8 @@ def find_format_structure(data: pd.DataFrame):
                 chapter_occurs[chapter].append(occur_time)
             act_chapters[name].add(chapter)
 
-    chapter_avg_occurs = [(chapter, sum(occur)) for (chapter, occur) in chapter_occurs.items()]
+    chapter_avg_occurs = [(chapter, sum(occur))
+                          for (chapter, occur) in chapter_occurs.items()]
     chapter_avg_occurs.sort(key=lambda chapter_occur: chapter_occur[1])
     chapters_in_order = [chapter for chapter, _ in chapter_avg_occurs]
 
@@ -154,6 +162,7 @@ def find_format_structure(data: pd.DataFrame):
                                         if chapter in act_chapters[act]])
 
     return structure
+
 
 def colour_meta(data: pd.DataFrame):
     acts = data['act'].unique()
@@ -166,9 +175,11 @@ def colour_meta(data: pd.DataFrame):
 
     for i, act in enumerate(format_structure):
         chapter_gradient = utils.brightness_range(colours[i], len(format_structure[act]),
-                                                  saturation_bounds=(0.6, 0.95),
+                                                  saturation_bounds=(
+                                                      0.6, 0.95),
                                                   value_bounds=(1, 0.6),
-                                                  hue_shift_max=min(1/9, 1/len(format_structure)),
+                                                  hue_shift_max=min(
+                                                      1/9, 1/len(format_structure)),
                                                   use_linear_luminance_function=True)
         for j, chapter in enumerate(format_structure[act]):
             format_structure[act][chapter] = chapter_gradient[j]
@@ -189,13 +200,15 @@ def manual_colour_meta(data: pd.DataFrame):
 
         format_structure[act] = dict.fromkeys(chapters_in_order)
 
-    colours = utils.manual_colour_scheme(len(acts), [len(format_structure[act]) for act in format_structure])
+    colours = utils.manual_colour_scheme(
+        len(acts), [len(format_structure[act]) for act in format_structure])
 
     for i, act in enumerate(format_structure):
         for j, chapter in enumerate(format_structure[act]):
             format_structure[act][chapter] = colours[i][j]
 
     return format_structure
+
 
 get_metric_postfix = {'Kdh000': '',
                       'Kdh%': '%',
@@ -206,15 +219,19 @@ st.set_page_config(layout="wide")
 # DEVELOPMENT:
 # bar_plot_component_fun = components.declare_component('bar_plot_component', url='http://localhost:3001')
 # PRODUCTION BUILD:
-current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+current_dir = os.path.dirname(os.path.abspath(
+    inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
-bar_plot_build_dir = os.path.join(parent_dir, 'components/bar_plot_component_build')
-bar_plot_component_fun = components.declare_component('bar_plot_component', path=bar_plot_build_dir)
+bar_plot_build_dir = os.path.join(
+    parent_dir, 'components/bar_plot_component_build')
+bar_plot_component_fun = components.declare_component(
+    'bar_plot_component', path=bar_plot_build_dir)
 
 title_con = st.container()
 component_con = st.container()
 
-data = pd.read_csv(os.path.join(os.path.dirname(parent_dir), 'public/experiment.csv'))
+data = pd.read_csv(os.path.join(
+    os.path.dirname(parent_dir), 'public/experiment.csv'))
 
 with title_con:
     if data is not None:
@@ -224,10 +241,12 @@ with title_con:
 
 with st.sidebar:
     if data is not None:
-        seleted_metric = st.selectbox('Data metric', ['Kdh000', 'Kdh%', 'Kta%'])
+        seleted_metric = st.selectbox(
+            'Data metric', ['Kdh000', 'Kdh%', 'Kta%'])
         data = format_data(data, seleted_metric)
 
-        seleted_granularity = st.selectbox('Granularity level', ['segment', 'chapter', 'episode'])
+        seleted_granularity = st.selectbox(
+            'Granularity level', ['segment', 'chapter', 'episode'])
         data = granulate_data(data, seleted_granularity)
 
 with component_con:
@@ -245,4 +264,5 @@ with component_con:
 
         metadata['colour'] = manual_colour_meta(data)
 
-        comp = bar_plot_component_fun(data=data, metadata=metadata, default=0, key=key_string)
+        comp = bar_plot_component_fun(
+            data=data, metadata=metadata, default=0, key=key_string)
