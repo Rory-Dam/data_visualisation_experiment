@@ -108,20 +108,27 @@ with component_con:
         metadata['chapter_order'] = list(chapters)
 
         colour_map = {}
-        colours = utils.manual_colour_scheme(len(chapters), 1)
+        if len(chapters) > utils.MANUAL_COLOUR_SCHEME_NUM_COLOURS:
+            colours = utils.normalised_hue_range(len(chapters), (0.02, 1))
 
-        for i, chapter in enumerate(chapters):
-            colour_map[chapter] = colours[i][0]
+            for i, chapter in enumerate(chapters):
+                colour_map[chapter] = colours[i]
+
+        else:
+            colours = utils.manual_colour_scheme(len(chapters), 1)
+
+            for i, chapter in enumerate(chapters):
+                colour_map[chapter] = colours[i][0]
 
         metadata['colour'] = colour_map
 
         acts = data['act'].unique()
 
         act_colour_map = {}
-        act_colours = utils.manual_colour_scheme(len(acts)*2, 8)[::2]
+        act_colours = utils.normalised_hue_range(len(acts), (0.02, 1))
 
         for i, act in enumerate(acts):
-            act_colour_map[act] = act_colours[i][2]
+            act_colour_map[act] = act_colours[i]
 
         metadata['act_colour'] = act_colour_map
 

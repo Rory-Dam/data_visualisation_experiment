@@ -9,6 +9,20 @@ import utils
 
 
 def format_data(data: pd.DataFrame, metric) -> pd.DataFrame:
+    """ Format the data read from CIA CSV files to the general format.
+
+    Arguments:
+        - data (pd.DataFrame): The data read from the CSV files.
+        - metric: The metric to be used for formatting the data.
+
+    Returns:
+        - formatted_data (pd.DataFrame): The formatted data in the general format.
+
+    Note:
+        - The function performs several transformations on the data, such as converting column data types,
+            filling missing values, and calculating relative times.
+
+    """
     def times_abs2rel(times, start_time, end_time):
         times = [int(time) for time in times]
         start_time = int(start_time)
@@ -66,6 +80,19 @@ def format_data(data: pd.DataFrame, metric) -> pd.DataFrame:
 
 
 def granulate_data(data: pd.DataFrame, granularity):
+    """ Granulate the data based on the specified granularity level.
+
+    Arguments:
+        - data (pd.DataFrame): The data to be granulated, provided as a pandas DataFrame.
+        - granularity: The granularity level at which the data should be grouped.
+            - 'segment': No grouping is applied; the original data is returned.
+            - 'chapter': The data is grouped by chapter, and aggregated values are calculated.
+            - 'episode': The data is grouped by episode, and aggregated values are calculated.
+
+    Returns:
+        - granular_data (pd.DataFrame): The granulated data as a pandas DataFrame.
+
+    """
     if data is None:
         return None
 
@@ -138,6 +165,20 @@ def granulate_data(data: pd.DataFrame, granularity):
 
 
 def find_format_structure(data: pd.DataFrame):
+    """ Find and determine the structure of the format based on acts and chapters.
+
+    Arguments:
+        - data (pd.DataFrame): The data to be analyzed, provided as a pandas DataFrame.
+
+    Returns:
+        - structure (dict): A dictionary representing the structure of acts and chapters.
+                            Each act contains a subset of chapters.
+
+    Note:
+        - The function expects the 'data' parameter to be a pandas DataFrame.
+        - The 'data' parameter should contain columns: 'act', 'chapter', 'start_time', and 'end_time'.
+
+    """
     chapter_occurs = {}
     act_chapters = {}
     for name, group in data.groupby('act'):
@@ -164,20 +205,30 @@ def find_format_structure(data: pd.DataFrame):
     return structure
 
 
-def colour_meta(data: pd.DataFrame):
+def generate_colour_scheme(data: pd.DataFrame):
+    """ Generate a color scheme for acts and chapters based on the provided data.
+
+    Arguments:
+        - data (pd.DataFrame): The data used to generate the color scheme, provided as a pandas DataFrame.
+
+    Returns:
+        - format_structure (dict): A nested dictionary representing the format structure.
+                                   Each act contains a dictionary of chapters with assigned colors.
+
+    """
     acts = data['act'].unique()
     chapters = data['chapter'].unique()
     format_structure = dict.fromkeys(acts, None)
-    for key in format_structure:
-        format_structure[key] = dict.fromkeys(chapters)
+    for act in format_structure:
+        format_structure[act] = dict.fromkeys(chapters)
 
     colours = utils.normalised_hue_range(len(format_structure), (0.02, 1))
 
     for i, act in enumerate(format_structure):
         chapter_gradient = utils.brightness_range(colours[i], len(format_structure[act]),
                                                   saturation_bounds=(
-                                                      0.6, 0.95),
-                                                  value_bounds=(1, 0.6),
+                                                      0.3, 0.95),
+                                                  value_bounds=(1, 0.5),
                                                   hue_shift_max=min(
                                                       1/9, 1/len(format_structure)),
                                                   use_linear_luminance_function=True)
@@ -187,25 +238,56 @@ def colour_meta(data: pd.DataFrame):
     return format_structure
 
 
-def manual_colour_meta(data: pd.DataFrame):
+def manual_generate_colour_scheme(data: pd.DataFrame):
+    """ Generate a color scheme for acts and chapters based on the provided data.
+    The manually fine-tuned CIA colourscheme will be used when the data allows it.
+
+    Arguments:
+        - data (pd.DataFrame): The data used to generate the color scheme, provided as a pandas DataFrame.
+
+    Returns:
+        - format_structure (dict): A nested dictionary representing the format structure.
+                                   Each act contains a dictionary of chapters with assigned colors.
+
+    """
     acts = data['act'].unique()
-    all_chapters = data['chapter'].unique()
     format_structure = dict.fromkeys(acts, None)
     for act in format_structure:
         act_chapters = data[data['act'] == act]['chapter'].unique()
-        chapters_in_order = []
-        for chapter in all_chapters:
-            if chapter in act_chapters:
-                chapters_in_order.append(chapter)
 
-        format_structure[act] = dict.fromkeys(chapters_in_order)
+        format_structure[act] = dict.fromkeys(act_chapters)
 
-    colours = utils.manual_colour_scheme(
-        len(acts), [len(format_structure[act]) for act in format_structure])
+    if len(acts) > utils.MANUAL_COLOUR_SCHEME_NUM_COLOURS:
+        colours = utils.normalised_hue_range(len(format_structure), (0.02, 1))
 
-    for i, act in enumerate(format_structure):
-        for j, chapter in enumerate(format_structure[act]):
-            format_structure[act][chapter] = colours[i][j]
+        for i, act in enumerate(format_structure):
+            chapter_gradient = utils.brightness_range(colours[i], len(format_structure[act]),
+                                                      saturation_bounds=(
+                                                          0.3, 0.95),
+                                                      value_bounds=(1, 0.5),
+                                                      hue_shift_max=min(
+                                                          1/9, 1/len(format_structure)),
+                                                      use_linear_luminance_function=True)
+            for j, chapter in enumerate(format_structure[act]):
+                format_structure[act][chapter] = chapter_gradient[j]
+
+    else:
+        colours = utils.manual_colour_scheme(len(acts), [len(format_structure[act]) if len(format_structure[act]) <= utils.MANUAL_COLOUR_SCHEME_MAX_GRADIENT_SIZE
+                                                         else 1
+                                                         for act in format_structure])
+
+        for i, act in enumerate(format_structure):
+            if len(format_structure[act]) > utils.MANUAL_COLOUR_SCHEME_MAX_GRADIENT_SIZE:
+                colours[i] = utils.brightness_range(colours[i][0], len(format_structure[act]),
+                                                    saturation_bounds=(
+                                                        0.3, 0.95),
+                                                    value_bounds=(1, 0.5),
+                                                    hue_shift_max=min(
+                                                        1/9, 1/len(format_structure)),
+                                                    use_linear_luminance_function=True)
+
+            for j, chapter in enumerate(format_structure[act]):
+                format_structure[act][chapter] = colours[i][j]
 
     return format_structure
 
@@ -262,7 +344,8 @@ with component_con:
         chapters = data['chapter'].unique()
         metadata['chapter_order'] = list(chapters)
 
-        metadata['colour'] = manual_colour_meta(data)
+        # metadata['colour'] = generate_colour_scheme(data)
+        metadata['colour'] = manual_generate_colour_scheme(data)
 
         comp = bar_plot_component_fun(
             data=data, metadata=metadata, default=0, key=key_string)
